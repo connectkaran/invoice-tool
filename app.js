@@ -80,7 +80,7 @@ const defaultSettings = {
   nextNumber: 1,
   financialYear: "2026-27",
   defaultGstRate: "18",
-  template: "classic",
+  template: "smc",
   autosave: "Yes"
 };
 
@@ -356,7 +356,13 @@ function toCamel(value) {
 }
 
 function getSettings() {
-  return Object.assign({}, defaultSettings, readDataFields("setting"), loadJson(settingsKey) || {});
+  const settings = Object.assign({}, defaultSettings, readDataFields("setting"), loadJson(settingsKey) || {});
+  settings.template = normalizeTemplate(settings.template);
+  return settings;
+}
+
+function normalizeTemplate(template) {
+  return template === "shalini" ? "shalini" : "smc";
 }
 
 function loadOrganisationIntoInvoice() {
@@ -769,6 +775,7 @@ function downloadMasters() {
 }
 
 function selectTemplate(template) {
+  template = normalizeTemplate(template);
   updateTemplateCards(template);
   const settings = getSettings();
   settings.template = template;
@@ -786,11 +793,12 @@ function updateTemplateCards(template) {
 }
 
 function applyTemplateClass(template) {
+  template = normalizeTemplate(template);
   if (!preview) return;
   Array.from(preview.classList).forEach((className) => {
     if (className.indexOf("template-") === 0) preview.classList.remove(className);
   });
-  preview.classList.add(`template-${template || "classic"}`);
+  preview.classList.add(`template-${template}`);
 }
 
 function syncStandalonePreview() {
@@ -836,16 +844,14 @@ function renderValidation(data, totals) {
 }
 
 function renderPreview(data, totals) {
-  const template = getSettings().template;
+  const template = normalizeTemplate(getSettings().template);
   applyTemplateClass(template);
   if (template === "shalini") {
     preview.innerHTML = renderShaliniTemplate(data, totals);
     return;
   }
-  if (template === "smc") {
-    preview.innerHTML = renderSmcTemplate(data, totals);
-    return;
-  }
+  preview.innerHTML = renderSmcTemplate(data, totals);
+  return;
   const taxRows = taxSummary(totals.itemRows, totals.intraState);
   preview.innerHTML = `
     <div class="invoice-page">
@@ -944,7 +950,7 @@ function renderShaliniTemplate(data, totals) {
           <h3>Invoice Details</h3>
           <p><span>Invoice No:-</span><strong>${escapeHtml(data.invoiceNo || "-")}</strong></p>
           <p><span>Invoice Date:-</span><strong>${formatDate(data.invoiceDate) || "-"}</strong></p>
-          <p><span>PAN:-</span><strong>${escapeHtml(data.sellerPan || "-")}</strong></p>
+          <p><span>PAN:-</span><strong>AMGPA5806N</strong></p>
         </section>
       </div>
 
@@ -961,19 +967,21 @@ function renderShaliniTemplate(data, totals) {
         <strong>Total Invoice Value (in words)</strong><span>${escapeHtml(amountInWords(Math.round(gross)))}</span>
       </div>
 
-      <p class="excel-note">${totals.gst ? "GST is calculated in the invoice data, but this template follows the supplied non-GST professional invoice format." : "* Not registered under GST. No GST applicable on above services."}</p>
+      <p class="excel-note">* Not registered under GST. No GST applicable on above services.</p>
 
       <div class="excel-signature">
-        <strong>${escapeHtml(data.sellerName || "Shalini Mittal")}</strong>
+        <strong>Shalini Mittal</strong>
         <span>Proprietor</span>
       </div>
 
       <div class="excel-bank-block">
         <h3>Bank Details:-</h3>
-        <p>${escapeHtml(data.sellerName || "Shalini Mittal")}</p>
-        <p>${escapeHtml(data.bankName || "ICICI Bank Limited")}</p>
-        <p>${escapeHtml(data.bankAccount ? "A/c No.:- " + data.bankAccount : "A/c No.:-")}</p>
-        <p>${escapeHtml(data.ifsc ? "IFSC Code:- " + data.ifsc : "IFSC Code:-")}</p>
+        <p>Shalini Mittal</p>
+        <p>ICICI Bank Limited</p>
+        <p>Rourkela Branch</p>
+        <p>Savings Account</p>
+        <p>A/c No.:- 150301505805</p>
+        <p>IFSC Code:- ICIC0001503</p>
       </div>
     </div>
   `;
@@ -992,8 +1000,8 @@ function renderSmcTemplate(data, totals) {
       <div class="smc-info-grid">
         <strong>Client Name & Address</strong><span>State Name:-</span><span>${escapeHtml(state)}</span><span>Bill No:-</span><strong>${escapeHtml(data.invoiceNo || "-")}</strong>
         <strong>${escapeHtml(data.buyerName || "-")}</strong><span>State Code:-</span><span>${escapeHtml(stateCode)}</span><span>Date:-</span><strong>${formatDate(data.invoiceDate) || "-"}</strong>
-        <span>${nl(data.buyerAddress || "-")}</span><span>GSTIN:-</span><span>${escapeHtml(data.buyerGstin || "Unregistered")}</span><span>PAN:-</span><span>${escapeHtml(data.buyerPan || "-")}</span>
-        <span></span><span>RCM:-</span><span>${escapeHtml(data.reverseCharge || "No")}</span><span>GSTIN:-</span><span>${escapeHtml(data.sellerGstin || "-")}</span>
+        <span>${nl(data.buyerAddress || "-")}</span><span>GSTIN:-</span><span>${escapeHtml(data.buyerGstin || "Unregistered")}</span><span>PAN:-</span><span>AEBFS7086P</span>
+          <span></span><span>RCM:-</span><span>${escapeHtml(data.reverseCharge || "No")}</span><span>GSTIN:-</span><span>21AEBFS7086P1ZI</span>
         <span></span><span></span><span></span><span>UDYAM:</span><span>${escapeHtml(data.udyam || "UDYAM-OD-30-0005408")}</span>
       </div>
 
@@ -1012,24 +1020,29 @@ function renderSmcTemplate(data, totals) {
       </div>
 
       <div class="excel-signature">
-        <strong>For ${escapeHtml(data.sellerName || "S.Mittal & Co.")}</strong>
-        <span>Chartered Accountant</span>
+        <strong>For S. Mittal & Co.</strong>
+        <span>Chartered Accountants,</span>
+        <span class="signature-gap"></span>
         <strong>${escapeHtml(data.authorisedSignatory || "Sanjay Mittal, FCA")}</strong>
-        <span>Partner</span>
+        <span>Partner.</span>
       </div>
 
       <div class="smc-bank-grid">
         <div>
           <h3>Bank Details:-</h3>
-          <p>${escapeHtml(data.sellerName || "S.Mittal & Co.")}</p>
-          <p>${escapeHtml(data.bankName || "HDFC Bank Limited")}</p>
-          <p>${escapeHtml(data.bankAccount ? "A/c No.:- " + data.bankAccount : "A/c No.:-")}</p>
-          <p>${escapeHtml(data.ifsc ? "IFSC Code:- " + data.ifsc : "IFSC Code:-")}</p>
+          <p>S. Mittal & Co.</p>
+          <p>HDFC Bank Limited</p>
+          <p>Rourkela Branch</p>
+          <p>Current Account</p>
+          <p>A/c No.:- 50200072199782</p>
+          <p>IFSC Code:- HDFC0005380</p>
         </div>
         <div>
           <h3>Bank Details:-</h3>
-          <p>S.Mittal & Co.</p>
+          <p>S. Mittal & Co.</p>
           <p>Karur Vysya Bank</p>
+          <p>Rourkela Branch</p>
+          <p>Current Account</p>
           <p>A/c No.:- 3205135000004581</p>
           <p>IFSC Code:- KVBL0003205</p>
         </div>
@@ -1154,20 +1167,20 @@ function sampleData() {
     dueDate: "",
     placeOfSupply: "27",
     reverseCharge: "No",
-    sellerName: seller.sellerName || "PVA Consultants",
-    sellerGstin: seller.sellerGstin || "27ABCDE1234F1Z5",
-    sellerPan: seller.sellerPan || "ABCDE1234F",
-    sellerState: seller.sellerState || "27",
-    sellerAddress: seller.sellerAddress || "Office 12, Business Park, Mumbai, Maharashtra",
+    sellerName: seller.sellerName || "S. Mittal & Co.",
+    sellerGstin: seller.sellerGstin || "21AEBFS7086P1ZI",
+    sellerPan: seller.sellerPan || "AEBFS7086P",
+    sellerState: seller.sellerState || "21",
+    sellerAddress: seller.sellerAddress || "Rourkela, Odisha",
     buyerName: "Connect Karan Private Limited",
     buyerGstin: "27AAACC1234D1Z7",
     buyerPan: "AAACC1234D",
     buyerState: "27",
     buyerAddress: "Andheri East, Mumbai, Maharashtra",
-    bankName: seller.bankName || "HDFC Bank",
-    bankAccount: seller.bankAccount || "50100123456789",
-    ifsc: seller.ifsc || "HDFC0001234",
-    upi: seller.upi || "pva@upi",
+    bankName: seller.bankName || "HDFC Bank Limited",
+    bankAccount: seller.bankAccount || "50200072199782",
+    ifsc: seller.ifsc || "HDFC0005380",
+    upi: seller.upi || "",
     shipping: 0,
     otherCharges: 500,
     items: [

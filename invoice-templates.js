@@ -4,7 +4,8 @@
   }
 
   function currentTemplate() {
-    return (typeof getSettings === "function" && getSettings().template) || "classic";
+    const template = (typeof getSettings === "function" && getSettings().template) || "smc";
+    return template === "shalini" ? "shalini" : "smc";
   }
 
   function applyTemplateClass(template) {
@@ -63,7 +64,7 @@
             <h3>Invoice Details</h3>
             <p><span>Invoice No:-</span><strong>${escapeHtml(data.invoiceNo || "-")}</strong></p>
             <p><span>Invoice Date:-</span><strong>${formatDate(data.invoiceDate) || "-"}</strong></p>
-            <p><span>PAN:-</span><strong>${escapeHtml(data.sellerPan || "-")}</strong></p>
+            <p><span>PAN:-</span><strong>AMGPA5806N</strong></p>
           </section>
         </div>
         <table class="excel-line-table">
@@ -77,17 +78,19 @@
           <strong>Total Invoice Value (in figures)</strong><span>${money(gross)}</span>
           <strong>Total Invoice Value (in words)</strong><span>${escapeHtml(amountInWords(Math.round(gross)))}</span>
         </div>
-        <p class="excel-note">${totals.gst ? "GST is calculated in the invoice data, but this template follows the supplied non-GST professional invoice format." : "* Not registered under GST. No GST applicable on above services."}</p>
+        <p class="excel-note">* Not registered under GST. No GST applicable on above services.</p>
         <div class="excel-signature">
-          <strong>${escapeHtml(data.sellerName || "Shalini Mittal")}</strong>
+          <strong>Shalini Mittal</strong>
           <span>Proprietor</span>
         </div>
         <div class="excel-bank-block">
           <h3>Bank Details:-</h3>
-          <p>${escapeHtml(data.sellerName || "Shalini Mittal")}</p>
-          <p>${escapeHtml(data.bankName || "ICICI Bank Limited")}</p>
-          <p>${escapeHtml(data.bankAccount ? "A/c No.:- " + data.bankAccount : "A/c No.:-")}</p>
-          <p>${escapeHtml(data.ifsc ? "IFSC Code:- " + data.ifsc : "IFSC Code:-")}</p>
+          <p>Shalini Mittal</p>
+          <p>ICICI Bank Limited</p>
+          <p>Rourkela Branch</p>
+          <p>Savings Account</p>
+          <p>A/c No.:- 150301505805</p>
+          <p>IFSC Code:- ICIC0001503</p>
         </div>
       </div>
     `;
@@ -107,8 +110,8 @@
         <div class="smc-info-grid">
           <strong>Client Name & Address</strong><span>State Name:-</span><span>${escapeHtml(state)}</span><span>Bill No:-</span><strong>${escapeHtml(data.invoiceNo || "-")}</strong>
           <strong>${escapeHtml(data.buyerName || "-")}</strong><span>State Code:-</span><span>${escapeHtml(stateCode)}</span><span>Date:-</span><strong>${formatDate(data.invoiceDate) || "-"}</strong>
-          <span>${nl(data.buyerAddress || "-")}</span><span>GSTIN:-</span><span>${escapeHtml(data.buyerGstin || "Unregistered")}</span><span>PAN:-</span><span>${escapeHtml(data.buyerPan || "-")}</span>
-          <span></span><span>RCM:-</span><span>${escapeHtml(data.reverseCharge || "No")}</span><span>GSTIN:-</span><span>${escapeHtml(data.sellerGstin || "-")}</span>
+          <span>${nl(data.buyerAddress || "-")}</span><span>GSTIN:-</span><span>${escapeHtml(data.buyerGstin || "Unregistered")}</span><span>PAN:-</span><span>AEBFS7086P</span>
+          <span></span><span>RCM:-</span><span>${escapeHtml(data.reverseCharge || "No")}</span><span>GSTIN:-</span><span>21AEBFS7086P1ZI</span>
           <span></span><span></span><span></span><span>UDYAM:</span><span>UDYAM-OD-30-0005408</span>
         </div>
         <table class="excel-line-table smc-lines">
@@ -124,23 +127,28 @@
           <strong>Total Invoice Value (in words)</strong><span>${escapeHtml(amountInWords(Math.round(totals.grandTotal)))}</span>
         </div>
         <div class="excel-signature">
-          <strong>For ${escapeHtml(data.sellerName || "S.Mittal & Co.")}</strong>
-          <span>Chartered Accountant</span>
+          <strong>For S. Mittal & Co.</strong>
+          <span>Chartered Accountants,</span>
+          <span class="signature-gap"></span>
           <strong>Sanjay Mittal, FCA</strong>
-          <span>Partner</span>
+          <span>Partner.</span>
         </div>
         <div class="smc-bank-grid">
           <div>
             <h3>Bank Details:-</h3>
-            <p>${escapeHtml(data.sellerName || "S.Mittal & Co.")}</p>
-            <p>${escapeHtml(data.bankName || "HDFC Bank Limited")}</p>
-            <p>${escapeHtml(data.bankAccount ? "A/c No.:- " + data.bankAccount : "A/c No.:-")}</p>
-            <p>${escapeHtml(data.ifsc ? "IFSC Code:- " + data.ifsc : "IFSC Code:-")}</p>
+            <p>S. Mittal & Co.</p>
+            <p>HDFC Bank Limited</p>
+            <p>Rourkela Branch</p>
+            <p>Current Account</p>
+            <p>A/c No.:- 50200072199782</p>
+            <p>IFSC Code:- HDFC0005380</p>
           </div>
           <div>
             <h3>Bank Details:-</h3>
-            <p>S.Mittal & Co.</p>
+            <p>S. Mittal & Co.</p>
             <p>Karur Vysya Bank</p>
+            <p>Rourkela Branch</p>
+            <p>Current Account</p>
             <p>A/c No.:- 3205135000004581</p>
             <p>IFSC Code:- KVBL0003205</p>
           </div>
@@ -177,6 +185,7 @@
     const settings = getSettings();
     settings.template = template;
     fillDataFields("setting", settings);
+    settings.template = template === "shalini" ? "shalini" : "smc";
     localStorage.setItem("gst-invoice-generator-settings-v1", JSON.stringify(settings));
     render();
     window.syncStandalonePreview();

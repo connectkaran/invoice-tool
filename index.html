@@ -360,11 +360,8 @@
         <section class="panel">
           <div class="panel-heading"><h2>Template Library</h2></div>
           <div class="template-grid">
-            <button class="template-card active" data-template="classic" type="button"><strong>Classic GST</strong><span>Clean statutory format</span></button>
-            <button class="template-card" data-template="compact" type="button"><strong>Compact</strong><span>Dense single-page format</span></button>
-            <button class="template-card" data-template="letterhead" type="button"><strong>Letterhead</strong><span>Extra space for branding</span></button>
+            <button class="template-card active" data-template="smc" type="button"><strong>S. Mittal & Co.</strong><span>GST/SAC tax invoice from sample_smc.xlsm</span></button>
             <button class="template-card" data-template="shalini" type="button"><strong>Shalini Mittal</strong><span>Non-GST professional invoice from sample_shalini.xlsm</span></button>
-            <button class="template-card" data-template="smc" type="button"><strong>S.Mittal & Co.</strong><span>GST/SAC tax invoice from sample_smc.xlsm</span></button>
           </div>
         </section>
       </div>
@@ -436,7 +433,7 @@
             <label>Next Number <input data-setting="nextNumber" type="number" min="1"></label>
             <label>Financial Year <input data-setting="financialYear"></label>
             <label>Default GST % <select data-setting="defaultGstRate"><option>0</option><option>5</option><option>12</option><option selected>18</option><option>28</option></select></label>
-            <label>Default Template <select data-setting="template"><option>classic</option><option>compact</option><option>letterhead</option><option>shalini</option><option>smc</option></select></label>
+            <label>Default Template <select data-setting="template"><option value="smc">S. Mittal & Co.</option><option value="shalini">Shalini Mittal</option></select></label>
             <label>Auto-save Draft <select data-setting="autosave"><option>Yes</option><option>No</option></select></label>
           </div>
         </section>
