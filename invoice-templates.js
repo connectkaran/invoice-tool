@@ -53,7 +53,7 @@
     const gross = totals.taxable + totals.cess;
     return `
       <div class="invoice-page excel-template shalini-template">
-        <div class="excel-top-link">Back to Table of Contents</div>
+        <div class="letterhead-space" aria-hidden="true"></div>
         <div class="excel-two-col">
           <section>
             <h3>Client Name & Address</h3>
@@ -102,10 +102,11 @@
     const stateCode = data.placeOfSupply || data.buyerState || "";
     const rate = serviceRows[0] ? serviceRows[0].gstRate : 18;
     const taxRows = totals.intraState
-      ? `<tr><td>Add: CGST @ ${formatNumber(rate / 2)}%</td><td>${money(totals.cgst)}</td></tr><tr><td>Add: SGST @ ${formatNumber(rate / 2)}%</td><td>${money(totals.sgst)}</td></tr>`
-      : `<tr><td>Add: IGST @ ${formatNumber(rate)}%</td><td>${money(totals.igst)}</td></tr>`;
+      ? `<tr><td colspan="2">Add: CGST @ ${formatNumber(rate / 2)}%</td><td>${money(totals.cgst)}</td></tr><tr><td colspan="2">Add: SGST @ ${formatNumber(rate / 2)}%</td><td>${money(totals.sgst)}</td></tr>`
+      : `<tr><td colspan="2">Add: IGST @ ${formatNumber(rate)}%</td><td>${money(totals.igst)}</td></tr>`;
     return `
       <div class="invoice-page excel-template smc-template">
+        <div class="letterhead-space" aria-hidden="true"></div>
         <h2>TAX INVOICE</h2>
         <div class="smc-info-grid">
           <strong>Client Name & Address</strong><span>State Name:-</span><span>${escapeHtml(state)}</span><span>Bill No:-</span><strong>${escapeHtml(data.invoiceNo || "-")}</strong>
