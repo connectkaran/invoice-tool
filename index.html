@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GST Invoice Generator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">GST Utility</p>
+        <h1>GST Invoice Generator</h1>
+      </div>
+      <div class="header-actions">
+        <button class="ghost" id="loadSampleBtn" type="button">Sample</button>
+        <button class="ghost" id="resetBtn" type="button">Reset</button>
+        <button class="primary" id="printBtn" type="button">Print / PDF</button>
+      </div>
+    </header>
+
+    <nav class="main-nav" aria-label="GST invoice workspace">
+      <button class="nav-tab active" data-view="createDocument" type="button">Create Document</button>
+      <button class="nav-tab" data-view="organisation" type="button">Organisation</button>
+      <button class="nav-tab" data-view="customers" type="button">Customers</button>
+      <button class="nav-tab" data-view="itemsServices" type="button">Items / Services</button>
+      <button class="nav-tab" data-view="templateLibrary" type="button">Template Library</button>
+      <button class="nav-tab" data-view="livePreview" type="button">Live Preview</button>
+      <button class="nav-tab" data-view="invoiceRegister" type="button">Invoice Register</button>
+      <button class="nav-tab" data-view="reports" type="button">Reports</button>
+      <button class="nav-tab" data-view="backupRestore" type="button">Backup / Restore</button>
+      <button class="nav-tab" data-view="settings" type="button">Settings</button>
+    </nav>
+
+    <section class="app-view active" id="createDocumentView">
+    <section class="summary-bar" aria-live="polite">
+      <div>
+        <span>Invoice value</span>
+        <strong id="grandTotalStat">Rs. 0.00</strong>
+      </div>
+      <div>
+        <span>Taxable value</span>
+        <strong id="taxableStat">Rs. 0.00</strong>
+      </div>
+      <div>
+        <span>GST</span>
+        <strong id="gstStat">Rs. 0.00</strong>
+      </div>
+      <div>
+        <span>Mode</span>
+        <strong id="taxModeStat">CGST + SGST</strong>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <form class="editor" id="invoiceForm">
+        <section class="section-grid">
+          <div class="panel">
+            <div class="panel-heading">
+              <h2>Invoice</h2>
+              <span id="saveState">Autosaved</span>
+            </div>
+            <div class="field-grid three">
+              <label>
+                Type
+                <select name="invoiceType">
+                  <option>Tax Invoice</option>
+                  <option>Bill of Supply</option>
+                  <option>Proforma Invoice</option>
+                  <option>Debit Note</option>
+                  <option>Credit Note</option>
+                </select>
+              </label>
+              <label>
+                Invoice No.
+                <input name="invoiceNo" required>
+              </label>
+              <label>
+                Invoice Date
+                <input name="invoiceDate" type="date" required>
+              </label>
+              <label>
+                Due Date
+                <input name="dueDate" type="date">
+              </label>
+              <label>
+                Place of Supply
+                <select name="placeOfSupply" id="placeOfSupply"></select>
+              </label>
+              <label>
+                Reverse Charge
+                <select name="reverseCharge">
+                  <option>No</option>
+                  <option>Yes</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-heading">
+              <h2>Seller</h2>
+              <button class="text-button" id="copySellerBtn" type="button">Save seller</button>
+            </div>
+            <div class="field-grid two">
+              <label>
+                Business Name
+                <input name="sellerName" required>
+              </label>
+              <label>
+                GSTIN
+                <input name="sellerGstin" maxlength="15" required>
+              </label>
+              <label>
+                PAN
+                <input name="sellerPan" maxlength="10">
+              </label>
+              <label>
+                State
+                <select name="sellerState" id="sellerState"></select>
+              </label>
+              <label class="wide">
+                Address
+                <textarea name="sellerAddress" rows="3"></textarea>
+              </label>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-heading">
+              <h2>Buyer</h2>
+              <label class="compact-check">
+                <input name="unregisteredBuyer" type="checkbox">
+                Unregistered
+              </label>
+            </div>
+            <div class="field-grid two">
+              <label>
+                Customer Name
+                <input name="buyerName" required>
+              </label>
+              <label>
+                GSTIN
+                <input name="buyerGstin" maxlength="15">
+              </label>
+              <label>
+                PAN
+                <input name="buyerPan" maxlength="10">
+              </label>
+              <label>
+                State
+                <select name="buyerState" id="buyerState"></select>
+              </label>
+              <label class="wide">
+                Billing Address
+                <textarea name="buyerAddress" rows="3"></textarea>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel item-panel">
+          <div class="panel-heading">
+            <h2>Items</h2>
+            <div class="inline-actions">
+              <button class="ghost" id="addItemBtn" type="button">Add item</button>
+              <button class="ghost" id="clearItemsBtn" type="button">Clear</button>
+            </div>
+          </div>
+          <div class="items-wrap">
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th>HSN/SAC</th>
+                  <th>Qty</th>
+                  <th>Rate</th>
+                  <th>Disc %</th>
+                  <th>GST %</th>
+                  <th>Cess</th>
+                  <th>Amount</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="itemsBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section-grid">
+          <div class="panel">
+            <div class="panel-heading">
+              <h2>Payment</h2>
+            </div>
+            <div class="field-grid two">
+              <label>
+                Bank Name
+                <input name="bankName">
+              </label>
+              <label>
+                Account No.
+                <input name="bankAccount">
+              </label>
+              <label>
+                IFSC
+                <input name="ifsc">
+              </label>
+              <label>
+                UPI ID
+                <input name="upi">
+              </label>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-heading">
+              <h2>Adjustments</h2>
+            </div>
+            <div class="field-grid two">
+              <label>
+                Shipping
+                <input name="shipping" type="number" min="0" step="0.01">
+              </label>
+              <label>
+                Other Charges
+                <input name="otherCharges" type="number" step="0.01">
+              </label>
+              <label>
+                Round Off
+                <select name="roundOffMode">
+                  <option value="auto">Auto nearest rupee</option>
+                  <option value="none">None</option>
+                  <option value="manual">Manual</option>
+                </select>
+              </label>
+              <label>
+                Manual Round Off
+                <input name="roundOffManual" type="number" step="0.01">
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>Notes & Terms</h2>
+          </div>
+          <div class="field-grid two">
+            <label>
+              Notes
+              <textarea name="notes" rows="4"></textarea>
+            </label>
+            <label>
+              Terms
+              <textarea name="terms" rows="4"></textarea>
+            </label>
+          </div>
+        </section>
+      </form>
+
+      <aside class="preview-column">
+        <section class="panel tools-panel">
+          <div class="panel-heading">
+            <h2>Actions</h2>
+          </div>
+          <div class="tool-grid">
+            <button id="saveInvoiceBtn" type="button">Save Invoice</button>
+            <button id="exportJsonBtn" type="button">Export Draft</button>
+            <label class="file-button">
+              Import Draft
+              <input id="importJsonInput" type="file" accept="application/json,.json">
+            </label>
+            <button id="exportCsvBtn" type="button">Export CSV</button>
+            <button id="copySummaryBtn" type="button">Copy Summary</button>
+          </div>
+          <div class="validation-list" id="validationList"></div>
+        </section>
+
+        <section class="invoice-preview" id="invoicePreview" aria-label="Invoice preview"></section>
+      </aside>
+    </div>
+    </section>
+
+    <section class="app-view" id="organisationView">
+      <div class="page-grid">
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>Organisation</h2>
+            <button id="loadOrgIntoInvoiceBtn" type="button">Use in Invoice</button>
+          </div>
+          <div class="field-grid three master-form" id="organisationForm">
+            <label>Business Name <input data-org="name"></label>
+            <label>GSTIN <input data-org="gstin" maxlength="15"></label>
+            <label>PAN <input data-org="pan" maxlength="10"></label>
+            <label>State <select data-org="state" id="orgState"></select></label>
+            <label>Phone <input data-org="phone"></label>
+            <label>Email <input data-org="email" type="email"></label>
+            <label class="wide">Address <textarea data-org="address" rows="3"></textarea></label>
+            <label>Bank Name <input data-org="bankName"></label>
+            <label>Account No. <input data-org="bankAccount"></label>
+            <label>IFSC <input data-org="ifsc"></label>
+            <label>UPI ID <input data-org="upi"></label>
+            <label>Default Notes <textarea data-org="notes" rows="3"></textarea></label>
+            <label>Default Terms <textarea data-org="terms" rows="3"></textarea></label>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="app-view" id="customersView">
+      <div class="page-grid">
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>Customers</h2>
+            <div class="inline-actions">
+              <button id="addCustomerBtn" type="button">Add / Update</button>
+              <button id="useCustomerBtn" type="button">Use Selected</button>
+            </div>
+          </div>
+          <div class="field-grid three master-form" id="customerForm">
+            <label>Name <input data-customer="name"></label>
+            <label>GSTIN <input data-customer="gstin" maxlength="15"></label>
+            <label>PAN <input data-customer="pan" maxlength="10"></label>
+            <label>State <select data-customer="state" id="customerState"></select></label>
+            <label>Phone <input data-customer="phone"></label>
+            <label>Email <input data-customer="email" type="email"></label>
+            <label class="wide">Address <textarea data-customer="address" rows="3"></textarea></label>
+          </div>
+          <div class="table-card"><table class="data-table"><thead><tr><th></th><th>Name</th><th>GSTIN</th><th>State</th><th>Phone</th><th></th></tr></thead><tbody id="customersBody"></tbody></table></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="app-view" id="itemsServicesView">
+      <div class="page-grid">
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>Items / Services</h2>
+            <div class="inline-actions">
+              <button id="addMasterItemBtn" type="button">Add / Update</button>
+              <button id="insertMasterItemBtn" type="button">Insert Selected</button>
+            </div>
+          </div>
+          <div class="field-grid three master-form" id="masterItemForm">
+            <label>Description <input data-master-item="description"></label>
+            <label>HSN/SAC <input data-master-item="hsn"></label>
+            <label>Default Qty <input data-master-item="qty" type="number" min="0" step="0.001"></label>
+            <label>Rate <input data-master-item="rate" type="number" min="0" step="0.01"></label>
+            <label>GST % <select data-master-item="gstRate"><option>0</option><option>0.25</option><option>3</option><option>5</option><option>12</option><option selected>18</option><option>28</option></select></label>
+            <label>Cess <input data-master-item="cess" type="number" min="0" step="0.01"></label>
+          </div>
+          <div class="table-card"><table class="data-table"><thead><tr><th></th><th>Description</th><th>HSN/SAC</th><th>Rate</th><th>GST %</th><th></th></tr></thead><tbody id="masterItemsBody"></tbody></table></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="app-view" id="templateLibraryView">
+      <div class="page-grid">
+        <section class="panel">
+          <div class="panel-heading"><h2>Template Library</h2></div>
+          <div class="template-grid">
+            <button class="template-card active" data-template="classic" type="button"><strong>Classic GST</strong><span>Clean statutory format</span></button>
+            <button class="template-card" data-template="compact" type="button"><strong>Compact</strong><span>Dense single-page format</span></button>
+            <button class="template-card" data-template="letterhead" type="button"><strong>Letterhead</strong><span>Extra space for branding</span></button>
+            <button class="template-card" data-template="shalini" type="button"><strong>Shalini Mittal</strong><span>Non-GST professional invoice from sample_shalini.xlsm</span></button>
+            <button class="template-card" data-template="smc" type="button"><strong>S.Mittal & Co.</strong><span>GST/SAC tax invoice from sample_smc.xlsm</span></button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="app-view" id="livePreviewView">
+      <div class="standalone-preview" id="standalonePreview"></div>
+    </section>
+
+    <section class="app-view" id="invoiceRegisterView">
+      <div class="page-grid">
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>Invoice Register</h2>
+            <div class="inline-actions">
+              <button id="downloadSalesRegisterBtn" type="button">Download Sales Register</button>
+              <button id="downloadInvoiceRegisterBtn" type="button">Download Invoice Register</button>
+            </div>
+          </div>
+          <div class="filter-row">
+            <label>From <input id="registerFromDate" type="date"></label>
+            <label>To <input id="registerToDate" type="date"></label>
+            <label>Search <input id="registerSearch" placeholder="Invoice, customer, GSTIN"></label>
+          </div>
+          <div class="table-card"><table class="data-table"><thead><tr><th>No.</th><th>Date</th><th>Customer</th><th>GSTIN</th><th>Taxable</th><th>CGST</th><th>SGST</th><th>IGST</th><th>Total</th><th></th></tr></thead><tbody id="invoiceRegisterBody"></tbody></table></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="app-view" id="reportsView">
+      <div class="page-grid">
+        <section class="report-cards" id="reportCards"></section>
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>Reports</h2>
+            <div class="inline-actions">
+              <button id="downloadGstr1Btn" type="button">Download GSTR-1 Summary</button>
+              <button id="downloadHsnBtn" type="button">Download HSN Summary</button>
+            </div>
+          </div>
+          <div class="split-reports">
+            <div class="table-card"><table class="data-table"><thead><tr><th>GST Rate</th><th>Taxable</th><th>CGST</th><th>SGST</th><th>IGST</th><th>Total</th></tr></thead><tbody id="taxReportBody"></tbody></table></div>
+            <div class="table-card"><table class="data-table"><thead><tr><th>HSN/SAC</th><th>Description</th><th>Taxable</th><th>GST</th></tr></thead><tbody id="hsnReportBody"></tbody></table></div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="app-view" id="backupRestoreView">
+      <div class="page-grid">
+        <section class="panel">
+          <div class="panel-heading"><h2>Backup / Restore</h2></div>
+          <div class="tool-grid roomy">
+            <button id="downloadBackupBtn" type="button">Download Full Backup</button>
+            <label class="file-button">Restore Backup <input id="restoreBackupInput" type="file" accept="application/json,.json"></label>
+            <button id="downloadMastersBtn" type="button">Download Masters</button>
+            <button id="downloadCurrentDraftBtn" type="button">Download Current Draft</button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="app-view" id="settingsView">
+      <div class="page-grid">
+        <section class="panel">
+          <div class="panel-heading"><h2>Settings</h2></div>
+          <div class="field-grid three master-form" id="settingsForm">
+            <label>Invoice Prefix <input data-setting="invoicePrefix"></label>
+            <label>Next Number <input data-setting="nextNumber" type="number" min="1"></label>
+            <label>Financial Year <input data-setting="financialYear"></label>
+            <label>Default GST % <select data-setting="defaultGstRate"><option>0</option><option>5</option><option>12</option><option selected>18</option><option>28</option></select></label>
+            <label>Default Template <select data-setting="template"><option>classic</option><option>compact</option><option>letterhead</option><option>shalini</option><option>smc</option></select></label>
+            <label>Auto-save Draft <select data-setting="autosave"><option>Yes</option><option>No</option></select></label>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js?v=20260708-gst"></script>
+  <script src="invoice-templates.js?v=20260708-xlsm2"></script>
+</body>
+</html>
