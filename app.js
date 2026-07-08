@@ -1201,8 +1201,8 @@ function validPan(value) {
 }
 
 function amountInWords(numValue) {
-  if (!isFinite(numValue)) return "Rupees zero only";
-  if (numValue === 0) return "Rupees zero only";
+  if (!isFinite(numValue)) return titleCaseAmountWords("Rupees zero only");
+  if (numValue === 0) return titleCaseAmountWords("Rupees zero only");
   const ones = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
   const tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
   function belowHundred(n) {
@@ -1221,7 +1221,11 @@ function amountInWords(numValue) {
     }
   });
   if (n) parts.push(belowThousand(n).trim());
-  return "Rupees " + parts.join(" ").replace(/\s+/g, " ") + " only";
+  return titleCaseAmountWords("Rupees " + parts.join(" ").replace(/\s+/g, " ") + " only");
+}
+
+function titleCaseAmountWords(value) {
+  return String(value || "").replace(/\b[a-z]/g, (char) => char.toUpperCase());
 }
 
 function stateName(code) {

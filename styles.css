@@ -769,6 +769,11 @@ textarea {
   padding: 8px;
 }
 
+.excel-value-grid span:nth-child(2) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 .excel-note {
   margin: 18px 0 34px;
   font-weight: 800;
